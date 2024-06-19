@@ -334,6 +334,7 @@ interface IDBUtils {
         val timestamp = System.currentTimeMillis() / 1000
         val (width, height) = try {
             val bmp = BitmapFactory.decodeStream(inputStream)
+            println("================= Kotlin is interesting. bmp.width=${bmp.width} bmp.height=${bmp.height}")
             Pair(bmp.width, bmp.height)
         } catch (e: Exception) {
             Pair(0, 0)
@@ -344,8 +345,18 @@ interface IDBUtils {
             ?: "image/*"
         val (rotationDegrees, latLong) = try {
             val exif = ExifInterface(inputStream)
+            val requiredRotation = when (exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                else -> 0
+            }
+            println("================= Kotlin is interesting.requiredRotation=${requiredRotation}")
             Pair(
-                if (isAboveAndroidQ) exif.rotationDegrees else 0,
+                if (isAboveAndroidQ) requiredRotation else 0,
                 if (isAboveAndroidQ) null else exif.latLong
             )
         } catch (e: Exception) {
